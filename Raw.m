@@ -10,34 +10,48 @@ addpath('./feature/Gabor');
 addpath('./classifier');
 addpath('./superpixel');
 addpath('./classifier/KNN');
+addpath '.\classifier\libsvm-3.17';
+addpath '.\classifier\libsvm-3.17\matlab';
+
+
 %% 导入数据集
-load IndiaP.mat;
+load IndiaP.mat; 
+
 load Indian_pines_gt.mat
+
 [nRow, nCol, nBand] = size(img);
+gt = indian_pines_gt;
+% figure('Name', 'indian_pines的label');imshow(label2rgb(gt));
+
+%% 高光谱图像-》伪彩色图像
+RgbImg = hyperspectral2rgb(img, [3 30 87]);
 
 %% 向量化、归一化
 im_2d = ToVector(img)';
 im_2d = im_2d./repmat(sqrt(sum(im_2d.*im_2d)),[size(im_2d,1) 1]);
 
+
 %% PCA 降维
 [coeff score latent] = pca(im_2d');
-% pca_result = score(:,1:3);
-% superpixel_input =reshape(pca_result, nRow, nCol, 3);  %超像素分割的输入
-
+pca_result = score(:,1:3);
+superpixel_input =reshape(pca_result, nRow, nCol, 3);  %超像素分割的输入
 
 
 %% 产生超像素
 % SLIC
-% numSuperpixels = 1500;  % the desired number of superpixels
-% compactness = 0.1; % compactness2 = 1-compactness, the clustering is according to: compactness*dxy+compactness2*dspectral
-% dist_type = 2; % distance type - 1:Euclidean；2：SAD; 3:SID; 4:SAD-SID
-% seg_all = 1; % 1: all the pixles participate in the clustering， 2: some pixels would not
-% [superpixel_label, numlabels, seedx, seedy] = SLIC( superpixel_input, numSuperpixels, compactness, dist_type, seg_all);
-% superpixel_label = double(reshape(superpixel_label, nRow, nCol));
+numSuperpixels = 150;  % the desired number of superpixels  indian_pines:1500
+compactness = 0.1; % compactness2 = 1-compactness, the clustering is according to: compactness*dxy+compactness2*dspectral
+dist_type = 2; % distance type - 1:Euclidean；2：SAD; 3:SID; 4:SAD-SID
+seg_all = 1; % 1: all the pixles participate in the clustering， 2: some pixels would not
+[superpixel_label, numlabels, seedx, seedy] = SLIC( superpixel_input, numSuperpixels, compactness, dist_type, seg_all);
+superpixel_label = double(reshape(superpixel_label, nRow, nCol));
 
 % Entropy rate
-% number_superpixels = 1500;lambda_prime = 0.8;sigma = 10; conn8 = 1;
+% number_superpixels = 326;lambda_prime = 0.8;sigma = 10; conn8 = 1;
 % superpixel_label = EntropyRate(superpixel_input, number_superpixels, lambda_prime, sigma,conn8);
+
+% 画超像素图像
+paintSuperpixelAdge(RgbImg, superpixel_label);
 
 %% 特征提取
 
@@ -67,17 +81,25 @@ im_2d = im_2d./repmat(sqrt(sum(im_2d.*im_2d)),[size(im_2d,1) 1]);
 % var_xy=[3,3;7,7;11,11;15,15];
 % Gabor_feature = GetGaborFeat(pca_result,lambda,theta,var_xy);
 % 第二种
-pca_result1 = score(:,1:10);
-gabor_input =reshape(pca_result1, nRow, nCol, 10); 
-BW = 5;
-DataGabor = Gabor_feature_extraction_PC(gabor_input, BW);
-d = size(DataGabor, 3);
-Data_tmp = reshape(DataGabor, nRow*nCol, d);
-Data_tmp = Data_tmp';
+% pca_result1 = score(:,1:10);
+% gabor_input =reshape(pca_result1, nRow, nCol, 10); 
+% BW = 5;
+% DataGabor = Gabor_feature_extraction_PC(gabor_input, BW);
+% d = size(DataGabor, 3);
+% Data_tmp = reshape(DataGabor, nRow*nCol, d);
+% Data_tmp = Data_tmp';
 %% 训练集、测试集的划分
-[train, test, nClass] = randomSampling(Data_tmp, indian_pines_gt, 'byPercent', 0.1);
+% [train, test, nClass] = randomSampling(im_2d, indian_pines_gt, 'byPercent', 0.1);
 
 %% 分类
+
+% trainX = train.data;
+% trainY = train.label;
+% trainIndex = train.index;
+% testX = test.data;
+% testY = test.label;
+% testIndex = test.index;
+
 % 稀疏表示
 % K = 1;
 % [classification_result] = SparseRepresentation(train, test, nClass, K);
@@ -104,11 +126,9 @@ Data_tmp = Data_tmp';
 % [OA,AA,kappa,CA] = NRS_Classification(train, test, lambda);
 
 % KNN
-trainX = train.data;
-trainY = train.label;
-trainIndex = train.index;
-testX = test.data;
-testY = test.label;
-testIndex = test.index;
-[best_k, knn_test_response]=calculate_best_k(trainY, trainX);
-[OA,AA,kappa,CA] = k_nn_classifier(trainX, trainY, best_k, testX, testY);
+% [best_k, knn_test_response]=calculate_best_k(trainY, trainX);
+% [OA,AA,kappa,CA] = k_nn_classifier(trainX, trainY, best_k, testX, testY);
+
+% SVM
+% [C, P] = SVM_MG(testX', trainX', trainY, testY, 128, 0.0156);
+% [OA,AA,kappa,CA] = confusion(testY, C);
