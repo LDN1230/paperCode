@@ -1,4 +1,4 @@
-function LBP_fea = LBP_feature_global(Data, radius, num_point, mapping, W0, map)
+function [LBP_fea, lbp_img] = LBP_feature_global(Data, radius, num_point, mapping, W0, map)
 
 % Data: 3-D Data
 % W0: block size of a local LBP image  (2*W0+1 x 2*W0+1), usually W0 >= 9

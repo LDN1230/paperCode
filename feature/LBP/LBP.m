@@ -140,6 +140,7 @@ bsizey=ceil(max(maxy,0))-floor(min(miny,0))+1;
 bsizex=ceil(max(maxx,0))-floor(min(minx,0))+1;
 
 % Coordinates of origin (0,0) in the block （0，0）坐标在块中
+
 origy=1-floor(min(miny,0));
 origx=1-floor(min(minx,0));
 
@@ -188,7 +189,7 @@ for i = 1:neighbors
     % Compute interpolated pixel values
     N = w1*d_image(fy:fy+dy,fx:fx+dx) + w2*d_image(fy:fy+dy,cx:cx+dx) + ...
         w3*d_image(cy:cy+dy,fx:fx+dx) + w4*d_image(cy:cy+dy,cx:cx+dx);
-    D = N >= d_C; 
+    D = N >= d_C;   % D是logical矩阵，将N,d_C比较
   end  
   % Update the result matrix.
   v = 2^(i-1);

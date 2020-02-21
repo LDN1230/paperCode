@@ -39,34 +39,40 @@ superpixel_input =reshape(pca_result, nRow, nCol, 3);  %超像素分割的输入
 
 %% 产生超像素
 % SLIC
-numSuperpixels = 150;  % the desired number of superpixels  indian_pines:1500
+numSuperpixels = 200;  % the desired number of superpixels  indian_pines:1500
 compactness = 0.1; % compactness2 = 1-compactness, the clustering is according to: compactness*dxy+compactness2*dspectral
 dist_type = 2; % distance type - 1:Euclidean；2：SAD; 3:SID; 4:SAD-SID
 seg_all = 1; % 1: all the pixles participate in the clustering， 2: some pixels would not
-[superpixel_label, numlabels, seedx, seedy] = SLIC( superpixel_input, numSuperpixels, compactness, dist_type, seg_all);
+[superpixel_label, numlabels, seedx, seedy] = SLIC( img, numSuperpixels, compactness, dist_type, seg_all);
 superpixel_label = double(reshape(superpixel_label, nRow, nCol));
 
 % Entropy rate
 % number_superpixels = 326;lambda_prime = 0.8;sigma = 10; conn8 = 1;
 % superpixel_label = EntropyRate(superpixel_input, number_superpixels, lambda_prime, sigma,conn8);
 
-% 画超像素图像
-paintSuperpixelAdge(RgbImg, superpixel_label);
+
+
 
 %% 特征提取
 
 % LBP特征
-% lbp_input = reshape(pca_result, nRow, nCol, 3);
-% r = 2;
-% nr = 8;
-% mapping = getmapping(nr,'u2');
-% LBP_feature = LBP_feature_global(lbp_input, 2, nr, mapping, 11, indian_pines_gt);
-% d = size(LBP_feature, 3);
-% LBP_feature = reshape(LBP_feature, nRow*nCol, d);
-% LBP_feature = LBP_feature';
-% maxV = max(LBP_feature(:));
-% LBP_feature = LBP_feature./maxV;
+lbp_input = reshape(pca_result, nRow, nCol, 3);
+r = 2;
+nr = 8;
+mapping = getmapping(nr,'u2');
+[LBP_feature, lbp_img] = LBP_feature_global(lbp_input, 2, nr, mapping, 11, indian_pines_gt);
+d = size(LBP_feature, 3);
+LBP_feature = reshape(LBP_feature, nRow*nCol, d);
+LBP_feature = LBP_feature';
+maxV = max(LBP_feature(:));
+LBP_feature = LBP_feature./maxV;
 
+% 利用lbp特征，超像素融合
+mergedSuperpixel = mergeSuperpixel(superpixel_label,lbp_img);
+
+% 画超像素图像
+paintSuperpixelAdge(RgbImg, superpixel_label);
+paintSuperpixelAdge(RgbImg, mergedSuperpixel);
 
 % Recursive filter特征
 % RF_feature = spatial_feature(img, 204, 0.5);
@@ -89,16 +95,16 @@ paintSuperpixelAdge(RgbImg, superpixel_label);
 % Data_tmp = reshape(DataGabor, nRow*nCol, d);
 % Data_tmp = Data_tmp';
 %% 训练集、测试集的划分
-% [train, test, nClass] = randomSampling(im_2d, indian_pines_gt, 'byPercent', 0.1);
+[train, test, nClass] = randomSampling(im_2d, indian_pines_gt, 'byPercent', 0.1);
 
 %% 分类
 
-% trainX = train.data;
-% trainY = train.label;
-% trainIndex = train.index;
-% testX = test.data;
-% testY = test.label;
-% testIndex = test.index;
+trainX = train.data;
+trainY = train.label;
+trainIndex = train.index;
+testX = test.data;
+testY = test.label;
+testIndex = test.index;
 
 % 稀疏表示
 % K = 1;
@@ -117,10 +123,10 @@ paintSuperpixelAdge(RgbImg, superpixel_label);
 % [OA,AA,kappa,CA] = neighbor_JSR(img, train, test, scale, K);
 
 % 基于超像素的JSR  
-% K = 1;
-% index_map = reshape(1:size(im_2d,2),[nRow,nCol]);
-% [OA,AA,kappa,CA] = superpixel_JSR(im_2d, train, test, superpixel_label,index_map, K);
-
+K = 1;
+index_map = reshape(1:size(im_2d,2),[nRow,nCol]);
+[OA,AA,kappa,CA] = superpixel_JSR(im_2d, train, test, superpixel_label,index_map, K);
+[OA1,AA1,kappa1,CA1] = superpixel_JSR(im_2d, train, test, mergedSuperpixel,index_map, K);
 % NRS
 % lambda = 0.6;
 % [OA,AA,kappa,CA] = NRS_Classification(train, test, lambda);
