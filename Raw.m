@@ -39,7 +39,7 @@ superpixel_input =reshape(pca_result, nRow, nCol, 3);  %超像素分割的输入
 
 %% 产生超像素
 % SLIC
-numSuperpixels = 200;  % the desired number of superpixels  indian_pines:1500
+numSuperpixels = 1800;  % the desired number of superpixels  indian_pines:1500
 compactness = 0.1; % compactness2 = 1-compactness, the clustering is according to: compactness*dxy+compactness2*dspectral
 dist_type = 2; % distance type - 1:Euclidean；2：SAD; 3:SID; 4:SAD-SID
 seg_all = 1; % 1: all the pixles participate in the clustering， 2: some pixels would not
@@ -56,6 +56,8 @@ superpixel_label = double(reshape(superpixel_label, nRow, nCol));
 %% 特征提取
 
 % LBP特征
+t1 = cputime;
+fprintf('LBP特征提取中......\n');
 lbp_input = reshape(pca_result, nRow, nCol, 3);
 r = 2;
 nr = 8;
@@ -66,10 +68,14 @@ LBP_feature = reshape(LBP_feature, nRow*nCol, d);
 LBP_feature = LBP_feature';
 maxV = max(LBP_feature(:));
 LBP_feature = LBP_feature./maxV;
+t2 = cputime-t1;
+fprintf('LBP特征提取所用时间:%.fs\n', t2);
 
 % 利用lbp特征，超像素融合
+t1 = cputime;
 mergedSuperpixel = mergeSuperpixel(superpixel_label,lbp_img);
-
+t2 = cputime-t1;
+fprintf('超像素融合所用时间:%.4fs\n', t2);
 % 画超像素图像
 paintSuperpixelAdge(RgbImg, superpixel_label);
 paintSuperpixelAdge(RgbImg, mergedSuperpixel);
@@ -109,7 +115,9 @@ testIndex = test.index;
 % 稀疏表示
 % K = 1;
 % [classification_result] = SparseRepresentation(train, test, nClass, K);
-
+% para = [1e-2];  % regularized parameter
+% class = SRC_Classification_post(trainX', train.nEveryClass, testX',para);
+% [OA,AA,kappa,CA] = confusion(testY, class');
 
 % ELM-kernel
 % kerneloption = [5];
@@ -127,6 +135,7 @@ K = 1;
 index_map = reshape(1:size(im_2d,2),[nRow,nCol]);
 [OA,AA,kappa,CA] = superpixel_JSR(im_2d, train, test, superpixel_label,index_map, K);
 [OA1,AA1,kappa1,CA1] = superpixel_JSR(im_2d, train, test, mergedSuperpixel,index_map, K);
+
 % NRS
 % lambda = 0.6;
 % [OA,AA,kappa,CA] = NRS_Classification(train, test, lambda);

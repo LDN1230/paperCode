@@ -10,19 +10,19 @@ function neighbors = findNeighbor(img, position)
         neighbors_temp = zeros(1,5);
         neighbors_temp(1,1) = index;
         n = 2;
-        if mod(index,r)>1 % 除了第一行以外
+        if mod(index,r)>1 && (img(index-1)~=img(index))% 除了第一行以外
             neighbors_temp(1,n) = index-1; 
             n = n+1;
         end
-        if index+r<=total % 除了最后一列以外
+        if index+r<=total && (img(index+r)~=img(index))% 除了最后一列以外
             neighbors_temp(1,n) = index+r;
             n = n+1;
         end
-        if mod(index,r)>0 % 除了最后一行以外
+        if mod(index,r)>0 && (img(index+1)~=img(index))% 除了最后一行以外
             neighbors_temp(1,n) = index+1;
             n = n+1;
         end
-        if index-r>=1 % 除了第一列以外
+        if index-r>=1 && (img(index-r)~=img(index))% 除了第一列以外
             neighbors_temp(1,n) = index-r;
             n = n+1;
         end
