@@ -1,4 +1,4 @@
-function [OA,AA,kappa,CA] = NRS_Classification(train, test, lambda)
+function class = NRS_Classification(train, test, lambda)
 %
 % Using MH weights to produce class label
 %
@@ -29,5 +29,5 @@ addpath('./classifier/NRS');
         end
        [value class(j)] = max(Y_snr);
     end
-    [OA,AA,kappa,CA] = confusion(test.label, class);
+   
 end

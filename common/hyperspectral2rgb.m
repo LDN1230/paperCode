@@ -17,4 +17,6 @@ function RgbImg = hyperspectral2rgb(hyperspectralImg, selectedBands)
             end
         end
     end
+    RgbImg = 255*RgbImg;
+    RgbImg = uint8(RgbImg);
 end

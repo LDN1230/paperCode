@@ -1,13 +1,14 @@
-function [OA,AA,kappa,CA] = neighbor_JSR(img, train, test, scale, K)
+function [result, residual_1] = neighbor_JSR(img, train, testX, testY, testIndex, scale, K)
+    addpath('./classifier/JSR');
     [i_row, i_col, nb] = size(img);
     trainX = train.data;
     trainY = train.label;
     trainIndex = train.index;
-    testX = test.data;
-    testY = test.label;
-    testIndex = test.index;
     C = max(trainY(:));
     for i = 1:1:size(testX,2)
+        if  mod(i, uint16(size(testX,2)/10)) == 0
+            fprintf('******');
+        end
         row = mod(testIndex(i),i_row);
         if row == 0
             row = i_row;
@@ -18,7 +19,7 @@ function [OA,AA,kappa,CA] = neighbor_JSR(img, train, test, scale, K)
         col_range = ceil(col-(scale-1)/2 : col+(scale-1)/2);
         col_range(col_range<=0)= 1;col_range(col_range>=i_col)= i_col;
         temp = img(row_range,col_range,:);
-        X = ToVector(temp)';
+        X = ToVector(temp)';       
         X = X./repmat(sqrt(sum(X.*X)),[size(X,1) 1]);
         S = SOMP(trainX,X,K);
         for j = 1:1:C
@@ -29,10 +30,11 @@ function [OA,AA,kappa,CA] = neighbor_JSR(img, train, test, scale, K)
             residual(i,j) = norm(re_temp,'fro');       
         end  
     end
+    fprintf('\n');
     residual_1 = residual./repmat(sqrt(sum(residual.*residual)),[size(residual,1) 1]);
     residual_1 = residual_1';
     for i = 1:length(testY)
         result(i) = find(residual_1(:, i) == min(residual_1(:, i)));
     end
-    [OA,AA,kappa,CA] = confusion(testY, result);
+    
 end

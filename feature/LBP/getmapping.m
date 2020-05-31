@@ -113,7 +113,7 @@ end
 function mapping = getmapping_ver8(samples,mappingtype)
 % 模式缩减
 % 将2^sample种模式缩减为sample*(sample-1)+2种
-disp('For Matlab version 8.0 and higher');
+% disp('For Matlab version 8.0 and higher');
 
 table = 0:2^samples-1;
 newMax  = 0; %number of patterns in the resulting LBP code

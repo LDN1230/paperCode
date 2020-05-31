@@ -14,7 +14,9 @@ nb_c=max(true_label);
 confu=zeros(nb_c,nb_c);
 
 for i=1:l
-  confu(estim_label(i),true_label(i))= confu(estim_label(i),true_label(i))+1;
+    if true_label(i) ~= 0
+        confu(estim_label(i),true_label(i))= confu(estim_label(i),true_label(i))+1;
+    end
 end
 
 oa=trace(confu)/sum(confu(:)); %overall accuracy

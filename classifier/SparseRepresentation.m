@@ -7,7 +7,7 @@ function [classification_result] = SparseRepresentation(train, test, nClass, K)
     testY = test.label;
     % 用SOMP计算稀疏表示系数和残差
     for i = 1:1:size(testX,2)
-        tic;
+        %tic;
         S = SOMP(trainX, testX(:,i), K);
         
         for j = 1:1:nClass
@@ -17,7 +17,7 @@ function [classification_result] = SparseRepresentation(train, test, nClass, K)
             re_temp = testX(:,i) - D_c*S_c;
             residual(i,j) = norm(re_temp,'fro');
         end
-        toc;
+        %toc;
     end
     residual_1 = residual./repmat(sqrt(sum(residual.*residual)),[size(residual,1) 1]);
     residual_1 = residual_1';

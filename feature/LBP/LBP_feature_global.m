@@ -26,7 +26,7 @@ for i = 1:d
     I = X(:,:,i);
     I = I./max(I(:));
     [hist_fea lbp_img] = LBP(I,radius,num_point,mapping,'h');     
-    hist_fea = hist_lbp_HSI(lbp_img, mapping, W0, 'h', map);
+    hist_fea = hist_lbp_HSI(lbp_img, mapping, W0, 'nh', map);
     LBP_fea = cat(3, LBP_fea, hist_fea);
 
 end

@@ -1,4 +1,4 @@
-function [OA,AA,kappa,CA] = k_nn_classifier(Z,v,k,X, testY)
+function z = k_nn_classifier(Z,v,k,X, testY)
 
 
 
@@ -44,4 +44,4 @@ for i=1:N
     end
     [val,z(i)]=max(refe);
 end
-[OA,AA,kappa,CA] = confusion(testY, z);
+
